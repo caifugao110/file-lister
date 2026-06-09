@@ -1,51 +1,72 @@
 $ErrorActionPreference = "Stop"
 
-$project_name = "file-lister"
-$main_script = "app.py"
-$icon = "assets\app.ico"
+$Root = Split-Path -Parent $PSScriptRoot
+Set-Location $Root
 
-$script_dir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$project_dir = Split-Path -Parent $script_dir
-$build_dir = Join-Path $project_dir "build"
-$dist_dir = Join-Path $project_dir "dist"
+function Remove-InWorkspace {
+    param([string]$RelativePath)
 
-Set-Location $project_dir
-
-if (Test-Path $dist_dir) {
-    Remove-Item -Path $dist_dir -Recurse -Force
-}
-if (Test-Path $build_dir) {
-    Remove-Item -Path $build_dir -Recurse -Force
-}
-
-New-Item -ItemType Directory -Path $dist_dir -Force | Out-Null
-
-Write-Host "Building $project_name..." -ForegroundColor Cyan
-
-pyinstaller `
-    --name $project_name `
-    --onefile `
-    --windowed `
-    --add-data "assets;assets" `
-    --add-data "pyproject.toml;." `
-    --icon $icon `
-    $main_script
-
-if (Test-Path (Join-Path $dist_dir "$project_name.exe")) {
-    Write-Host "Build completed successfully!" -ForegroundColor Green
-    Write-Host "Executable: $(Join-Path $dist_dir "$project_name.exe")"
-
-    if (Test-Path $build_dir) {
-        Remove-Item -Path $build_dir -Recurse -Force
-        Write-Host "Intermediate build files cleaned up." -ForegroundColor Cyan
+    $target = Join-Path $Root $RelativePath
+    if (-not (Test-Path -LiteralPath $target)) {
+        return
     }
 
-    $spec_file = Join-Path $project_dir "$project_name.spec"
-    if (Test-Path $spec_file) {
-        Remove-Item -Path $spec_file -Force
-        Write-Host "Spec file cleaned up." -ForegroundColor Cyan
+    $resolvedRoot = (Resolve-Path -LiteralPath $Root).Path
+    $resolvedTarget = (Resolve-Path -LiteralPath $target).Path
+    if (-not $resolvedTarget.StartsWith($resolvedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to remove outside workspace: $resolvedTarget"
     }
-} else {
-    Write-Host "Build failed!" -ForegroundColor Red
-    exit 1
+
+    Remove-Item -LiteralPath $resolvedTarget -Recurse -Force
+}
+
+function Clear-BuildArtifacts {
+    Remove-InWorkspace ".venv"
+    Remove-InWorkspace "build"
+    Remove-InWorkspace ".pytest_cache"
+    Remove-InWorkspace "reports"
+    Remove-InWorkspace "file-lister.spec"
+    Remove-InWorkspace "dist\reports"
+
+    Get-ChildItem -LiteralPath $Root -Directory -Recurse -Force -Filter "__pycache__" |
+        Where-Object { $_.FullName.StartsWith($Root, [System.StringComparison]::OrdinalIgnoreCase) } |
+        Remove-Item -Recurse -Force
+
+    if (Test-Path ".\dist") {
+        Get-ChildItem ".\dist" -Force |
+            Where-Object { $_.Name -ne "file-lister.exe" } |
+            Remove-Item -Recurse -Force
+    }
+}
+
+try {
+    Clear-BuildArtifacts
+
+    python -m venv .venv
+
+    & ".\.venv\Scripts\python.exe" -m pip install --upgrade pip
+    & ".\.venv\Scripts\python.exe" -m pip install -r requirements.txt
+    if (-not (Test-Path ".\assets\app.ico")) {
+        throw "Missing icon file: assets\app.ico"
+    }
+
+    & ".\.venv\Scripts\pyinstaller.exe" `
+        --noconfirm `
+        --clean `
+        --onefile `
+        --windowed `
+        --name "file-lister" `
+        --icon ".\assets\app.ico" `
+        --add-data ".\assets;assets" `
+        --add-data ".\pyproject.toml;." `
+        ".\app.py"
+
+    if (-not (Test-Path ".\dist\file-lister.exe")) {
+        throw "Build did not produce dist\file-lister.exe"
+    }
+
+    Write-Host "Build complete: $Root\dist\file-lister.exe"
+}
+finally {
+    Clear-BuildArtifacts
 }
