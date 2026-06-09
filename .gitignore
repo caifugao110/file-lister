@@ -1,0 +1,24 @@
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.pyo
+
+build/
+*.spec
+
+dist/
+
+reports/
+*.log
+*.tmp
+*.bak
+
+# PyInstaller related files
+*.pkg
+*.toc
+*.zip
+*.pyz
+warn-*.txt
+xref-*.html
+localpycs/
