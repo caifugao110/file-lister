@@ -202,7 +202,7 @@ def write_html(records: list[FileRecord], path: Path) -> None:
         "<html lang=\"zh-CN\">\n"
         "<head>\n"
         "  <meta charset=\"utf-8\">\n"
-        "  <title>FileLister 文件清单</title>\n"
+        "  <title>file-lister 文件清单</title>\n"
         "  <style>\n"
         "    body { font-family: \"Microsoft YaHei\", Arial, sans-serif; margin: 32px; color: #18212f; background: #f6f8fb; }\n"
         "    h1 { margin: 0 0 16px; }\n"
@@ -222,7 +222,7 @@ def write_html(records: list[FileRecord], path: Path) -> None:
         "  </style>\n"
         "</head>\n"
         "<body>\n"
-        "  <h1>FileLister 文件清单</h1>\n"
+        "  <h1>file-lister 文件清单</h1>\n"
         "  <div class=\"summary\">\n"
         f"    <span><b>文件总数</b>{len(records)}</span>\n"
         f"    <span><b>总大小</b>{format_bytes(total_size)}</span>\n"
@@ -317,7 +317,7 @@ REPORT_DIR = project_root() / "reports"
 class FileListerApp(ttk.Window):
     def __init__(self) -> None:
         super().__init__(themename="flatly")
-        self.title(f"FileLister V{__version__}")
+        self.title(f"file-lister V{__version__}")
         self.geometry("1240x760")
         self.minsize(980, 620)
         if ASSET_ICON.exists():
@@ -346,7 +346,7 @@ class FileListerApp(ttk.Window):
         header.grid(row=0, column=0, sticky="ew")
         header.columnconfigure(0, weight=1)
 
-        title = ttk.Label(header, text="FileLister", font=("Microsoft YaHei UI", 22, "bold"))
+        title = ttk.Label(header, text="file-lister", font=("Microsoft YaHei UI", 22, "bold"))
         title.grid(row=0, column=0, sticky="w")
         meta = ttk.Label(header, text=f"V{__version__} 文件清单工具", bootstyle="secondary")
         meta.grid(row=1, column=0, sticky="w", pady=(2, 0))
@@ -666,7 +666,7 @@ class FileListerApp(ttk.Window):
 
     def show_about(self) -> None:
         dialog = ttk.Toplevel(self)
-        dialog.title("关于 FileLister")
+        dialog.title("关于 file-lister")
         dialog.geometry("460x260")
         dialog.resizable(False, False)
         dialog.transient(self)
@@ -675,7 +675,7 @@ class FileListerApp(ttk.Window):
 
         container = ttk.Frame(dialog, padding=22)
         container.pack(fill=BOTH, expand=YES)
-        ttk.Label(container, text="FileLister", font=("Microsoft YaHei UI", 18, "bold")).pack(anchor="w")
+        ttk.Label(container, text="file-lister", font=("Microsoft YaHei UI", 18, "bold")).pack(anchor="w")
         ttk.Label(container, text=f"版本 V{__version__}", bootstyle="secondary").pack(anchor="w", pady=(4, 0))
         ttk.Label(container, text=f"作者：{__author__}", bootstyle="secondary").pack(anchor="w", pady=(8, 0))
         ttk.Label(container, text="开源协议：MIT", bootstyle="secondary").pack(anchor="w", pady=(4, 0))
