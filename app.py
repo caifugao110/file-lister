@@ -316,7 +316,7 @@ REPORT_DIR = project_root() / "reports"
 
 class FileListerApp(ttk.Window):
     def __init__(self) -> None:
-        super().__init__(themename="flatly")
+        super().__init__(themename="yeti")
         self.title(f"file-lister V{__version__}")
         self.geometry("1240x760")
         self.minsize(980, 620)
@@ -324,7 +324,7 @@ class FileListerApp(ttk.Window):
             self.iconbitmap(str(ASSET_ICON))
 
         self.folder_var = tk.StringVar()
-        self.theme_var = tk.StringVar(value="flatly")
+        self.theme_var = tk.StringVar(value="yeti")
         self.report_var = tk.StringVar(value="尚未生成报告")
         self.summary_var = tk.StringVar(value="选择一个文件夹后开始获取文件清单")
         self.progress_var = tk.StringVar(value="")
